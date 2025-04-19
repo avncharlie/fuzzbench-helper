@@ -14,13 +14,13 @@ Usage example:
         --fuzzbench-dir ~/dev/fuzzbench
 """
 
-import argparse
 import re
-import subprocess
 import sys
 import textwrap
-from pathlib import Path
+import argparse
+import subprocess
 
+from pathlib import Path
 
 # --------------------------------------------------------------------------- CLI
 def parse_args() -> argparse.Namespace:
