@@ -61,13 +61,14 @@ def main() -> None:
     args = parse_args()
 
     # Resolve important paths
-    script_dir     = Path(__file__).resolve().parent
-    fuzzbench_dir  = Path(args.fuzzbench_dir).expanduser().resolve()
-    exp_dir        = script_dir / args.exp_name
-    data_dir       = exp_dir / "data"
-    report_dir     = exp_dir / "report"
-    webroot_dir    = report_dir / args.exp_name
-    config_path    = exp_dir / "config.yaml"
+    script_dir      = Path(__file__).resolve().parent
+    fuzzbench_dir   = Path(args.fuzzbench_dir).expanduser().resolve()
+    exp_dir         = script_dir / args.exp_name
+    data_dir        = exp_dir / "data"
+    report_dir      = exp_dir / "report"
+    webroot_dir     = report_dir / args.exp_name
+    webroot_dir_exp = report_dir / "experimental" / args.exp_name
+    config_path     = exp_dir / "config.yaml"
 
     # Sanity check – make sure run_experiment.py exists where the user pointed us
     if not (fuzzbench_dir / "experiment" / "run_experiment.py").is_file():
@@ -116,16 +117,21 @@ def main() -> None:
     ips = ", ".join([f"http://{x}:8000" for x in get_global_ipv4() + ["localhost"]])
     view_sh = textwrap.dedent(f"""\
         #!/bin/bash
-        WEBROOT="{webroot_dir}"
+        WEBROOT_PRIMARY="{webroot_dir}"
+        WEBROOT_ALT="{webroot_dir_exp}"
 
-        if [[ -d "$WEBROOT" ]]; then
-            echo "Serving report from $WEBROOT at one of: {ips}"
-            cd "$WEBROOT"
-            python3 -m http.server
+        if [[ -d "$WEBROOT_PRIMARY" ]]; then
+            echo "Serving report from $WEBROOT_PRIMARY at one of: {ips}"
+            cd "$WEBROOT_PRIMARY"
+        elif [[ -d "$WEBROOT_ALT" ]]; then
+            echo "Serving report from $WEBROOT_ALT at one of: {ips}"
+            cd "$WEBROOT_ALT"
         else
-            echo "Report directory '$WEBROOT' not yet created."
+            echo "Report directory not found (checked '$WEBROOT_PRIMARY' and '$WEBROOT_ALT')."
             exit 1
         fi
+
+        python3 -m http.server
         """)
     view_path = exp_dir / "view-report.sh"
     view_path.write_text(view_sh)
