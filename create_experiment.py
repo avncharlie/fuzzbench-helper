@@ -135,6 +135,7 @@ def main() -> None:
     print(f"✔  Experiment '{args.exp_name}' scaffolded in {exp_dir}")
     print(f"   Run experiment: ./{args.exp_name}/run.sh")
     print(f"   See experiment report: ./{args.exp_name}/view-report.sh")
+    print(f"   If using AFL, see fuzzing speeds: python3 get_fuzzer_speeds.py --exp-dir {args.exp_name}")
 
 if __name__ == "__main__":
     main()
