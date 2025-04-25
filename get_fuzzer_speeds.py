@@ -82,10 +82,14 @@ def main() -> None:
 
     exp_dirs = filter(lambda x: x.is_dir(), exp_dir_base.iterdir())
     for x in exp_dirs:
-        benchmark, fuzzer = x.name.split('-')
+        fuzzer = x.name.split('-')[-1]
+        benchmark = x.name.replace('-'+fuzzer, '')
         trial_speeds = get_exp_speeds(x)
+        if len(trial_speeds) == 0:
+            print(f"{x.name} doesn't have any data yet, skipping...")
+            continue
         mean = statistics.mean(trial_speeds)
-        stdev = statistics.stdev(trial_speeds)
+        stdev = statistics.stdev(trial_speeds)if len(trial_speeds) > 1 else -1
         results[benchmark][fuzzer] = (trial_speeds, mean, stdev)
 
 
@@ -98,11 +102,19 @@ def main() -> None:
         for fuzzer in fuzzers:
             speeds, mean, stdev = fuzzers_dict[fuzzer]
             colour = GREEN if fuzzer == fastest else YELLOW
+            stdev_str = ''
+            trials = 'trial'
+            trials_up = 'Trial'
+            if stdev != -1:
+                stdev_str = f", σ {stdev:.2f}"
+                trials = 'trials'
+                trials_up = 'Trials'
+
             print(
                 f"  {MAGENTA}{fuzzer}{RESET}: "
                 f"{colour}{mean:.2f}{RESET} exec/s "
-                f"({len(speeds)} trials, σ {stdev:.2f}). "
-                f"Trials → {speeds}"
+                f"({len(speeds)} {trials}{stdev_str}). "
+                f"{trials_up} → {speeds}"
             )
 
 if __name__ == "__main__":
