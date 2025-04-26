@@ -272,6 +272,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # data source → results dict
     # ------------------------------------------------------------------
+    csv_path = None
     if args.csv_path:
         csv_path = Path(args.csv_path).expanduser().resolve()
         if not csv_path.is_file():
@@ -293,7 +294,6 @@ def main() -> None:
         csv_path = exp_dir / "throughput.csv"
         write_csv(results, csv_path)
         out_base = exp_dir
-        print(f"CSV saved to {csv_path}")
 
     # ------------------------------------------------------------------
     # presentation (pretty print + chart)
@@ -303,6 +303,8 @@ def main() -> None:
     png_path = out_base / "throughput.png"
     emit_chart(results, png_path, show=False)
     print(f"\nChart saved to {png_path}")
+    if not args.csv_path:
+        print(f"CSV saved to {csv_path}")
 
 
 if __name__ == "__main__":
