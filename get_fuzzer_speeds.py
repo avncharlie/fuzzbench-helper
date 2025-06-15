@@ -110,8 +110,14 @@ def _trial_speed(trial: Path) -> float | None:
     ordered = sorted(tar_archives, key=archive_no, reverse=True)
 
     for t in ordered:
-        with tarfile.open(t, "r:gz") as tf:
-            for m in tf.getmembers():
+        with tarfile.open(t, "r:gz", errorlevel=0) as tf:
+            try:
+                members = tf.getmembers()
+            except tarfile.ReadError as e:
+                print(f'Issue with tar file {t} ...')
+                print(e)
+                continue
+            for m in members:
                 if m.name.endswith("fuzzer_stats"):
                     if DBG:
                         print(f"Found fuzzer_stats in {t}")
